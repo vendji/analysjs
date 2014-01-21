@@ -20,18 +20,18 @@
      * @param identify
      */
     Analysjs.prototype.load = function(key, identify) {
-        if (!key) {
-            var emptyMethod = function() {};
-            var methods = analytics.methods;
-            for (var name in methods) {
-                analytics[name] = emptyMethod;
-            }
-        } else {
+        if (key && key.length) {
             analytics.load(key);
             if (identify) {
                 $(function() {
                     identify();
                 });
+            }
+        } else {
+            var emptyMethod = function() {};
+            var methods = analytics.methods;
+            for (var name in methods) {
+                analytics[name] = emptyMethod;
             }
         }
     };

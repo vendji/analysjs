@@ -1,6 +1,6 @@
 {
     "name": "analysjs",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "license": "MIT",
     "engines": {
         "node": ">=0.8"
