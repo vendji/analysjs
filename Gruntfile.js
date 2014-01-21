@@ -22,7 +22,7 @@ module.exports = function(grunt) {
             dist : {
                 options : {
                     sourceMap : 'build/analysjs.js.map',
-                    sourceMappingURL : 'http://raw.github.com/vendji/analysjs/src/analysjs.js'
+                    sourceMappingURL : 'https://raw.github.com/vendji/analysjs/master/build/analysjs.js.map'
                 },
                 src : 'build/analysjs.js',
                 dest : 'build/analysjs.min.js'

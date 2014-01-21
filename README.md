@@ -62,21 +62,21 @@ A click event will be binded and when triggered will call `analytics.track` with
 
 #### 4 - Any other element
  - It will look for a `data-metric-page-view`, if found and `true` a page view event will be tracked, through `analytics.page`. Also a `data-metric-page-category` can be specified.
-```html
-<div data-metric="Home page"
-    data-metric-page-view="true"
-    data-metric-page-category="landing">
-    ...
-</div>
-```
+ ```html
+ <div data-metric="Home page"
+     data-metric-page-view="true"
+     data-metric-page-category="landing">
+     ...
+ </div>
+ ```
 Check the original documentation https://segment.io/libraries/analytics.js#page
 
  - It will look for a `data-metric-event`, if found the named event will be binded and `analytics.track` will be called when the event is triggered.
-```html
-<input type="text" name="address"
-    data-metric="Check address"
-    data-metric-event="blur">
-```
+ ```html
+ <input type="text" name="address"
+     data-metric="Check address"
+     data-metric-event="blur">
+ ```
 
  - Otherwise it will be ignored by auto-bind, being useful only if you call the `triggerMetric` plugin. Check below.
 
