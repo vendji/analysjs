@@ -78,7 +78,8 @@ window.analytics.SNIPPET_VERSION = '2.0.8';
         } else {
             var emptyMethod = function() {};
             var methods = analytics.methods;
-            for (var name in methods) {
+            for (var i in methods) {
+                var name = methods[i];
                 analytics[name] = emptyMethod;
             }
         }
