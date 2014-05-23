@@ -19,14 +19,30 @@
      * @param key
      * @param identify
      */
-    Analysjs.prototype.load = function(key, identify) {
+    Analysjs.prototype.load = function(key, profile, shouldAlias, callback) {
         if (key && key.length) {
             analytics.load(key);
-            if (identify) {
-                $(function() {
-                    identify();
-                });
-            }
+            analytics.ready(function(){
+                profile = profile || {};
+
+                var user = analytics.user();
+                if (!user || !user.id()) {
+                    var distinct_id = profile.distinct_id || profile.id;
+                    if (distinct_id) {
+                        if (shouldAlias) {
+                            analytics.alias(distinct_id);
+                        }
+                        analytics.identify(distinct_id, profile);
+                    } else {
+                        analytics.identify(profile);
+                    }
+                }
+                if (callback) {
+                    $(function() {
+                        callback();
+                    });
+                }
+            });
         } else {
             var emptyMethod = function() {};
             var methods = analytics.methods;

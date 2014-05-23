@@ -1,19 +1,19 @@
 /* jshint ignore:start */
 
 // Create a queue, but don't obliterate an existing one!
-window.analytics || (window.analytics = []);
+window.analytics = window.analytics || [];
 
-// A list of all the methods in analytics.js that we want to stub.
-window.analytics.methods = ['identify', 'track', 'trackLink', 'trackForm',
-    'trackClick', 'trackSubmit', 'page', 'pageview', 'ab', 'alias', 'ready',
-    'group', 'on', 'once', 'off'];
+// A list of the methods in Analytics.js to stub.
+window.analytics.methods = ['identify', 'group', 'track',
+    'page', 'pageview', 'alias', 'ready', 'on', 'once', 'off',
+    'trackLink', 'trackForm', 'trackClick', 'trackSubmit'];
 
-// Define a factory to create queue stubs. These are placeholders for the
-// "real" methods in analytics.js so that you never have to wait for the library
-// to load asynchronously to actually track things. The `method` is always the
-// first argument, so we know which method to replay the call into.
-window.analytics.factory = function (method) {
-    return function () {
+// Define a factory to create stubs. These are placeholders
+// for methods in Analytics.js so that you never have to wait
+// for it to load to actually record data. The `method` is
+// stored as the first argument, so we can replay the data.
+window.analytics.factory = function(method){
+    return function(){
         var args = Array.prototype.slice.call(arguments);
         args.unshift(method);
         window.analytics.push(args);
@@ -21,29 +21,34 @@ window.analytics.factory = function (method) {
     };
 };
 
-// For each of our methods, generate a queueing method.
+// For each of our methods, generate a queueing stub.
 for (var i = 0; i < window.analytics.methods.length; i++) {
-    var method = window.analytics.methods[i];
-    window.analytics[method] = window.analytics.factory(method);
+    var key = window.analytics.methods[i];
+    window.analytics[key] = window.analytics.factory(key);
 }
 
-// Define a method that will asynchronously load analytics.js from our CDN.
-window.analytics.load = function (apiKey) {
+// Define a method to load Analytics.js from our CDN,
+// and that will be sure to only ever load it once.
+window.analytics.load = function(key){
+    if (document.getElementById('analytics-js')) return;
 
-    // Create an async script element for analytics.js based on your API key.
+    // Create an async script element based on your key.
     var script = document.createElement('script');
     script.type = 'text/javascript';
+    script.id = 'analytics-js';
     script.async = true;
-    script.src = ('https:' === document.location.protocol ? 'https://' : 'http://') +
-        'd2dq2ahtl5zl1z.cloudfront.net/analytics.js/v1/' + apiKey + '/analytics.min.js';
+    script.src = ('https:' === document.location.protocol
+        ? 'https://' : 'http://')
+        + 'cdn.segment.io/analytics.js/v1/'
+        + key + '/analytics.min.js';
 
-    // Find the first script element on the page and insert our script next to it.
-    var firstScript = document.getElementsByTagName('script')[0];
-    firstScript.parentNode.insertBefore(script, firstScript);
+    // Insert our script next to the first script element.
+    var first = document.getElementsByTagName('script')[0];
+    first.parentNode.insertBefore(script, first);
 };
 
-// Add a version so we can keep track of what's out there in the wild.
-window.analytics.SNIPPET_VERSION = '2.0.8';
+// Add a version to keep track of what's in the wild.
+window.analytics.SNIPPET_VERSION = '2.0.9';
 
 /* jshint ignore:end */
 (function(global, $) {
@@ -67,14 +72,30 @@ window.analytics.SNIPPET_VERSION = '2.0.8';
      * @param key
      * @param identify
      */
-    Analysjs.prototype.load = function(key, identify) {
+    Analysjs.prototype.load = function(key, profile, shouldAlias, callback) {
         if (key && key.length) {
             analytics.load(key);
-            if (identify) {
-                $(function() {
-                    identify();
-                });
-            }
+            analytics.ready(function(){
+                profile = profile || {};
+
+                var user = analytics.user();
+                if (!user || !user.id()) {
+                    var distinct_id = profile.distinct_id || profile.id;
+                    if (distinct_id) {
+                        if (shouldAlias) {
+                            analytics.alias(distinct_id);
+                        }
+                        analytics.identify(distinct_id, profile);
+                    } else {
+                        analytics.identify(profile);
+                    }
+                }
+                if (callback) {
+                    $(function() {
+                        callback();
+                    });
+                }
+            });
         } else {
             var emptyMethod = function() {};
             var methods = analytics.methods;
